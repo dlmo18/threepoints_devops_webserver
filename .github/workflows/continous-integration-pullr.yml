@@ -1,0 +1,40 @@
+name: Validación de Pull Request
+
+on:
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v3
+
+      - name: Imprimir mensaje de análisis
+        run: echo "Realizando análisis de SAST"
+      
+      - name: Crear archivo de credenciales
+        env: 
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: envsubst < credentials.ini.tpl > credentials.ini
+
+      - name: Verificar existencia de archivo y definir variable
+        id: check-allow
+        run: |
+          if [ -f allow_pull_request.txt ]; then
+            echo "allow_pull=true" >> $GITHUB_OUTPUT
+          else
+            echo "allow_pull=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Evaluar permiso de build
+        run: |
+          if [ "${{ steps.check-allow.outputs.allow_pull }}" == "true" ]; then
+            echo "Permitiendo Pull Request"
+            docker build -t devops_ws . --tag devops_ws_$(date +%s)
+          else
+            echo "Impidiendo Pull Request"
+            exit 1
+          fi

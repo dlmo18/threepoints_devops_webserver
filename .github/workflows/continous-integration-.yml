@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - hotfix
-      - feature/**
+      - feature*
 
 jobs:
   practica-1:
