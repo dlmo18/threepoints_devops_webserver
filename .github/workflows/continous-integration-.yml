@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  preactica-1:
+  practica-1:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,10 +17,10 @@ jobs:
         run: echo "Ejecución de pruebas de SAST"
 
       - name: Crear archivo de credenciales
-        run: |
-          echo "[credentials]" > credentials.ini
-          echo "username=${{ secrets.USERNAME }}" >> credentials.ini
-          echo "password=${{ secrets.PASSWORD }}" >> credentials.ini
+        env: 
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: envsubst < credentials.ini.tpl > credentials.ini
 
       - name: Build docker image
         run: docker build -t devops_ws . --tag devops_ws_$(date +%s)
